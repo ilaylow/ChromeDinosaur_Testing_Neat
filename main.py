@@ -1,11 +1,11 @@
-from neat import genome
-import pygame
+import pygame           
 import os
 import math
 import random
 import sys
-import neat
+import neat       
 import pickle
+import keyboard
 
 from Actors.Dinosaur import Dinosaur
 from Actors.SmallCactus import SmallCactus
@@ -192,7 +192,7 @@ def play_manually():
             elif randint == 2:
                 obstacles.append(Bird(BIRD))
 
-        for obstacle in obstacles:
+        for obstacle in obstacles:                
             obstacle.draw(SCREEN)
             obstacle.update(obstacles, game_speed)
             for i, player in enumerate(players): # Generates a list of tuples [(1, player1), (2, player2), ...]
@@ -209,7 +209,7 @@ def play_manually():
             if user_input[pygame.K_LCTRL]:
                   player.dino_crouch = True
             else:
-                player.dino_crouch = False
+                player.dino_crouch = False             
 
         score()
         background()
@@ -249,5 +249,6 @@ if machine_play:
 
 else:
     print("yeetus")
+    
     play_manually()
 
