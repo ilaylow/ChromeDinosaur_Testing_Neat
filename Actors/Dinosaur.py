@@ -40,6 +40,7 @@ class Dinosaur:
     
     def crouch(self):
         self.image = CROUCHING
+        self.rect.y -= 10
 
     def run(self):
         self.image = RUNNING[self.step_index // 5]

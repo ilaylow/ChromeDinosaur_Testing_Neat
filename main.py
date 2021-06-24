@@ -24,6 +24,9 @@ SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 # Font Name
 FONT = pygame.font.Font("freesansbold.ttf", 20)
 
+# Determine whether machine plays or human plays
+machine_play = False
+
 def score():
     global points, game_speed
     points += 1
@@ -145,6 +148,74 @@ def eval_genomes(genomes, config):
         clock.tick(30)  
         pygame.display.update()
 
+# Play the game manually as a human
+def play_manually():
+
+    global game_speed, x_pos_bg, y_pos_bg, obstacles, players, points, ge, nets
+    clock = pygame.time.Clock()
+    
+    obstacles = []
+    players = [Dinosaur()]
+    
+    # Initialise Some Global Variables
+    game_speed = INITIAL_GAME_SPEED
+    x_pos_bg = 0
+    y_pos_bg = 380
+    points = 0
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        
+        SCREEN.fill((255, 255, 255)) # Fill screen with white
+
+        for player in players:
+            player.update()
+            player.draw(SCREEN, obstacles)
+        
+        # If all players are dead then we end the game (or essentially if our one player dies)
+        if (len(players)) == 0:
+            break
+
+        if (len(obstacles) == 0):
+            randint = random.randint(0, 3) # Returns either 0 or 1 or 2 (33.33% chance)
+            # Want to randomly spawn either a small cactus or a large cactus or a bird (crouching)
+            if randint == 0:
+                # Spawn any small cactus from the 3 images
+                obstacles.append(SmallCactus(SMALL_CACTI))
+            elif randint == 1:
+                # Spawn any large cactus from the 3 images
+                obstacles.append(LargeCactus(LARGE_CACTI))
+            elif randint == 2:
+                obstacles.append(Bird(BIRD))
+
+        for obstacle in obstacles:
+            obstacle.draw(SCREEN)
+            obstacle.update(obstacles, game_speed)
+            for i, player in enumerate(players): # Generates a list of tuples [(1, player1), (2, player2), ...]
+                if player.rect.colliderect(obstacle.rect):
+                    kill_player(i)
+
+        user_input = pygame.key.get_pressed()
+        
+        for i, player in enumerate(players):
+            if user_input[pygame.K_SPACE]:
+                player.dino_jump = True
+                player.dino_crouch = False
+                player.dino_run = False
+            if user_input[pygame.K_LCTRL]:
+                  player.dino_crouch = True
+            else:
+                player.dino_crouch = False
+
+        score()
+        background()
+        clock.tick(30)  
+        pygame.display.update()
+
 
 # Setup the NEAT AI
 def run(config_path):
@@ -165,13 +236,18 @@ def run(config_path):
     pickle.dump(best_genome, file_obj)
     file_obj.close()
 
-if __name__ == "__main__":
+if machine_play:
     local_dir = os.path.dirname(__file__) # Get the current directory of the file
     config_path = os.path.join(local_dir, 'config.txt')
     run(config_path)
 
-    model_file = open("best_model_genome.pkl", 'rb')
+    """ model_file = open("best_model_genome.pkl", 'rb')
     best_genome = pickle.load(model_file)
     model_file.close()
 
-    eval_genomes([best_genome], config_path)
+    eval_genomes([best_genome], config_path) """
+
+else:
+    print("yeetus")
+    play_manually()
+
